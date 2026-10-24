@@ -1,0 +1,2 @@
+uploads/product-images/*
+!uploads/product-images/.gitkeep
