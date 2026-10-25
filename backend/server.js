@@ -17,14 +17,36 @@ dotenv.config();
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL || "*" }));
+//app.use(cors({ origin: process.env.FRONTEND_URL || "*" }));
+
+const allowedOrigins = [
+  "https://dimgrey-gorilla-195680.hostingersite.com",
+  "https://shopmart.codetrios.com",
+  "http://shopmart.codetrios.com",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests without an Origin header, such as server-to-server calls.
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: false, limit: "10kb" }));
 app.use(morgan("dev"));
 app.use(
   "/uploads",
   helmet.crossOriginResourcePolicy({ policy: "cross-origin" }),
-  express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), "uploads")),
+  express.static(
+    path.join(path.dirname(fileURLToPath(import.meta.url)), "uploads"),
+  ),
 );
 
 app.get("/api/health", (req, res) => {
