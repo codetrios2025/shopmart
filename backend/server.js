@@ -96,6 +96,11 @@ const startServer = async () => {
   );
   startNewsletterCampaignProcessor();
   app.listen(PORT, () => {
+    console.log(
+      "[UPLOAD DEBUG] Environment UPLOAD_DIR:",
+      process.env.UPLOAD_DIR,
+    );
+    console.log("[UPLOAD DEBUG] Resolved directory:", uploadDirectory);
     console.log(`SHOPMART Backend Server running on port ${PORT}`);
     console.log(`Upload directory: ${uploadDirectory}`);
   });
