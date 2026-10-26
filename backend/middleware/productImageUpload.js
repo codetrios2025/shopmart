@@ -1,12 +1,24 @@
-import crypto from "crypto";
-import fs from "fs";
-import path from "path";
+import "dotenv/config";
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import multer from "multer";
-import { fileURLToPath } from "url";
+import { fileURLToPath } from "node:url";
 
-const uploadDirectory = fileURLToPath(
-  new URL("../uploads/product-images/", import.meta.url),
+const localUploadsDirectory = fileURLToPath(
+  new URL("../uploads/", import.meta.url),
 );
+
+// Local development defaults to backend/uploads.
+// On Hostinger, set UPLOAD_DIR to a writable directory outside hbuilds/current.
+const uploadRoot = path.resolve(
+  process.env.UPLOAD_DIR || localUploadsDirectory,
+);
+export const productImageUploadDirectory = path.join(
+  uploadRoot,
+  "product-images",
+);
+
 const extensionsByMimeType = {
   "image/jpeg": ".jpg",
   "image/png": ".png",
@@ -16,8 +28,8 @@ const extensionsByMimeType = {
 
 const storage = multer.diskStorage({
   destination(req, file, callback) {
-    fs.mkdir(uploadDirectory, { recursive: true }, (error) => {
-      callback(error, uploadDirectory);
+    fs.mkdir(productImageUploadDirectory, { recursive: true }, (error) => {
+      callback(error, productImageUploadDirectory);
     });
   },
   filename(req, file, callback) {
@@ -36,7 +48,9 @@ const upload = multer({
   },
   fileFilter(req, file, callback) {
     if (!extensionsByMimeType[file.mimetype]) {
-      const error = new Error("Product images must be JPEG, PNG, WebP, or GIF files");
+      const error = new Error(
+        "Product images must be JPEG, PNG, WebP, or GIF files",
+      );
       error.statusCode = 400;
       callback(error);
       return;
@@ -52,4 +66,3 @@ export const uploadProductImages = (req, res, next) => {
     next();
   });
 };
-export const productImageUploadDirectory = uploadDirectory;

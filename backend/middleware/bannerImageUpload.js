@@ -1,11 +1,20 @@
-import crypto from "crypto";
-import fs from "fs";
-import path from "path";
+import "dotenv/config";
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import multer from "multer";
-import { fileURLToPath } from "url";
+import { fileURLToPath } from "node:url";
 
-export const bannerImageUploadDirectory = fileURLToPath(
-  new URL("../uploads/banner-images/", import.meta.url),
+const localUploadsDirectory = fileURLToPath(
+  new URL("../uploads/", import.meta.url),
+);
+
+const uploadRoot = path.resolve(
+  process.env.UPLOAD_DIR || localUploadsDirectory,
+);
+export const bannerImageUploadDirectory = path.join(
+  uploadRoot,
+  "banner-images",
 );
 
 const extensionsByMimeType = {
@@ -23,7 +32,10 @@ const upload = multer({
       });
     },
     filename(req, file, callback) {
-      callback(null, `${crypto.randomUUID()}${extensionsByMimeType[file.mimetype]}`);
+      callback(
+        null,
+        `${crypto.randomUUID()}${extensionsByMimeType[file.mimetype]}`,
+      );
     },
   }),
   limits: { files: 1, fileSize: 5 * 1024 * 1024 },
